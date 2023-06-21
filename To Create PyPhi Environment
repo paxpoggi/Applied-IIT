@@ -1,0 +1,5 @@
+conda create -n pyphi_c python=3.10.*
+conda activate pyphi_c
+pip install -U git+https://github.com/wmayner/pyphi.git@feature/iit-4.0
+pip install pynwb nwbwidgets matplotlib seaborn autograd jupyter
+jupyter notebook
