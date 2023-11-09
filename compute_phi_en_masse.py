@@ -122,11 +122,11 @@ def anova_analysis(all_iterations_phi_values):
     print("One-way ANOVA results:")
     print(anova_results)
 
-def compute_phi_lfp_rand_int(presentation_df, lfp_df, interval, channels, sampling_rate):
+def compute_phi_lfp_rand_int(presentation_df, lfp_df, interval, channels, sampling_rate, presentation_name):
     assert isinstance(presentation_df, pd.DataFrame), f"presentation_df is {type(presentation_df)}, not a DataFrame"
     # Apply bandpass filter to each of the random channels separately
     lfp_df[channels] = lfp_df[channels].apply(
-        lambda x: bandpass_filter(x, lowcut=8, highcut=12, fs=sampling_rate))
+        lambda x: bandpass_filter(x, lowcut=35, highcut=65, fs=sampling_rate))
 
     if lfp_df.isnull().sum().sum() > 0:
         print("NaNs introduced after bandpass_filter")
@@ -213,7 +213,11 @@ def compute_phi_lfp_rand_int(presentation_df, lfp_df, interval, channels, sampli
     # convert state by node TPM to state by state TPM to make it conditionally independent
     sbs_tpm = pyphi.convert.state_by_node2state_by_state(sbn_tpm)
     print(sbs_tpm.shape)
-
+    # Create a unique filename based on presentation and interval
+    output_folder = '/Users/poggi/Documents/Maier Lab/Figures (Pax)/TPMs'
+    filename = os.path.join(output_folder,"tpm_{probe_name}_{presentation_name}_{interval[0]}_{interval[1]}.csv")
+    df = pd.DataFrame(sbs_tpm)
+    csv_data = df.to_csv(filename, index=False)
     # use state by state TPM as Phi Input
     pyPhiInput = sbs_tpm
     labels = ('A', 'B', 'C')
@@ -382,7 +386,7 @@ if __name__ == '__main__':
         # Store all Phi values across all iterations for this probe
         all_iterations_phi_values = []
 
-        for iter_count in range(1):
+        for iter_count in range(4):
             # Choose three random channels
             random_channels = random.sample(list(lfp_df.columns), 3)
 
@@ -392,15 +396,15 @@ if __name__ == '__main__':
             for i, presentation in enumerate(presentations):
                 # Store max phi and corresponding state for each interval
                 interval_phi_values = {}
+                for presentation_name in presentation_names:
+                    for interval in intervals:
+                        max_phi, max_phi_state = compute_phi_lfp_rand_int(presentation, lfp_df, interval,
+                                                                  random_channels, sampling_rate, presentation_name)
+                        interval_phi_values[interval] = (max_phi, max_phi_state)
+                        print(
+                            f'Finished computing Phi value for {presentation_names[i]} - Interval {interval[0]}-{interval[1]} seconds')
 
-                for interval in intervals:
-                    max_phi, max_phi_state = compute_phi_lfp_rand_int(presentation, lfp_df, interval,
-                                                                  random_channels, sampling_rate)
-                    interval_phi_values[interval] = (max_phi, max_phi_state)
-                    print(
-                        f'Finished computing Phi value for {presentation_names[i]} - Interval {interval[0]}-{interval[1]} seconds')
-
-                presentation_phi_values[presentation_names[i]] = interval_phi_values
+            presentation_phi_values[presentation_names[i]] = interval_phi_values
 
             for presentation, intervals in presentation_phi_values.items():
                 print(f'Presentation: {presentation}')
@@ -434,7 +438,7 @@ if __name__ == '__main__':
 
         # Save as CSV
         fieldnames = ['probe_name', 'visual_area', 'iteration_phi_values']
-        with open(f'all_probes_data_sub_{filename_master}_alpha.csv', 'w', newline='') as csv_file:
+        with open(f'all_probes_data_sub_{filename_master}_gamma_visualization.csv', 'w', newline='') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(flattened_data)
