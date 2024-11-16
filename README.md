@@ -1,6 +1,6 @@
-# Consciousness-Calulator
+# Applied IIT
 
-This repository stores a variety of code associated with calculating Φ, the variable of consciousness in integrated information theory of Consciousness (IIT). It relies heavily on the PyPhi toolbox.[^1]
+This repository stores a variety of code associated with calculating Φ, the variable integrated information theory in integrated information theory (IIT). It relies heavily on the PyPhi toolbox.[^1]
 The following scripts calculate Φ using both spiking data as well as local field potentials (LFPs). 
 
 To run the files, you will need to download and use your own data. The data used in this current project comes from the Dandi Archives, specifically, DANDIset 000021 which has extensive electrophysiology data from mice collected using Neuropixels. The Dandiset is free to use and open-source with a Dandi account. 
